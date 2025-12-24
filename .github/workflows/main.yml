@@ -1,23 +1,39 @@
-name: CI
+name: FREE_RDP
 on: workflow_dispatch
+
 jobs:
   build:
     runs-on: windows-latest
     steps:
-      - name: Setup Ngrok
-        run: choco install ngrok
-      - name: Auth
+      - name: Install Ngrok
+        run: |
+          choco install ngrok -y
+          Import-Module "$env:ProgramData\chocolatey\helpers\chocolateyInstaller.psm1"
+          Update-SessionEnvironment
+
+      - name: Configure Ngrok
         run: ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
-      - name: Enable TS
+
+      - name: Setup Windows RDP
         run: |
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
-      - name: Set Password
-        run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
-      - name: Start Tunnel
+
+      - name: Create RDP User
         run: |
-          # Hum yahan region 'ap' (Asia Pacific) use kar rahe hain takay connection fast ho
-          Start-Process ngrok -ArgumentList "tcp --region ap 3389"
+          $user = "runneradmin"
+          $password = ConvertTo-SecureString "P@ssw0rd!" -AsPlainText -Force
+          if (Get-LocalUser -Name $user -ErrorAction SilentlyContinue) {
+              Set-LocalUser -Name $user -Password $password
+          } else {
+              New-LocalUser -Name $user -Password $password -FullName "Runner Admin"
+              Add-LocalGroupMember -Group "Administrators" -Member $user
+          }
+
+      - name: Start Tunnel
+        # Is line se hum Asia server use kar rahe hain takay block na ho
+        run: Start-Process ngrok -ArgumentList "tcp --region ap 3389"
+
       - name: Keep Alive
         run: Start-Sleep -Seconds 21600
