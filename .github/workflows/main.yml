@@ -12,7 +12,7 @@ jobs:
           Update-SessionEnvironment
 
       - name: Configure Ngrok
-        run: ngrok config add-authtoken 37Iwu0EvVs1xbdOqdIAsS6X9KCn_6dtWT1a9XNM15aCMdG3PB
+        run: ngrok config add-authtoken 37J1MgJ3aEOlIdGtVM5ZP3cdpht_2LCh7ueY88mtQneoGVDKE
 
       - name: Enable Windows RDP
         run: |
