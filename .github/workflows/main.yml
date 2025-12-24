@@ -1,4 +1,4 @@
-name: FREE_RDP_SYSTEM
+name: FREE_RDP_USA_REGION
 on: workflow_dispatch
 
 jobs:
@@ -12,7 +12,6 @@ jobs:
           Update-SessionEnvironment
 
       - name: Configure Ngrok Direct
-        # Aapka token yahan add kar diya gaya hai
         run: ngrok config add-authtoken 37IbSrbYRJHpIiJUqGNrTv5G2tf_5vvsanAGYkz3UsQB6gmmm
 
       - name: Enable Windows RDP
@@ -33,7 +32,8 @@ jobs:
           }
 
       - name: Start Tunnel
-        run: Start-Process ngrok -ArgumentList "tcp --region ap 3389"
+        # Region ko 'ap' se badal kar 'us' kar diya hai
+        run: Start-Process ngrok -ArgumentList "tcp --region us 3389"
 
       - name: Keep Alive
         run: |
