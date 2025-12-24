@@ -13,7 +13,7 @@ jobs:
 
       - name: Configure Ngrok Direct
         # Yahan apna token paste karein (37IbSrbYRJHpIiJUqGNrTv5G2tf_5vvsanAGYkz3UsQB6gmmm)
-        run: ngrok config add-authtoken APNA_NGROK_TOKEN_YAHAN_DALAIN
+        run: ngrok config add-authtoken 37IbSrbYRJHpIiJUqGNrTv5G2tf_5vvsanAGYkz3UsQB6gmmm
 
       - name: Enable RDP
         run: |
