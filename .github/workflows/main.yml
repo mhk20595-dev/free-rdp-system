@@ -1,4 +1,4 @@
-name: FREE_RDP_NEW_TOKEN
+name: FREE_RDP_FIXED_V2
 on: workflow_dispatch
 
 jobs:
@@ -12,7 +12,6 @@ jobs:
           Update-SessionEnvironment
 
       - name: Configure Ngrok
-        # Aapka naya token yahan update kar diya gaya hai
         run: ngrok config add-authtoken 37Iwu0EvVs1xbdOqdIAsS6X9KCn_6dtWT1a9XNM15aCMdG3PB
 
       - name: Enable Windows RDP
@@ -23,15 +22,21 @@ jobs:
       - name: Start Tunnel and Display Address
         shell: pwsh
         run: |
+          # Tunnel ko start karke thora wait karenge
           Start-Process ngrok -ArgumentList "tcp --region us 3389"
-          Write-Host "Waiting for tunnel address..."
-          Start-Sleep -Seconds 20
-          # Ye command address ko seedha GitHub screen par print karegi
-          $tunnels = Invoke-RestMethod http://localhost:4040/api/tunnels
-          $address = $tunnels.tunnels[0].public_url
-          Write-Host "----------------------------"
-          Write-Host "YOUR RDP ADDRESS: $address"
-          Write-Host "----------------------------"
+          Write-Host "Waiting 45 seconds for Ngrok to connect..."
+          Start-Sleep -Seconds 45
+          
+          # Address ko fetch karne ki koshish
+          try {
+              $tunnels = Invoke-RestMethod http://localhost:4040/api/tunnels
+              $address = $tunnels.tunnels[0].public_url
+              Write-Host "----------------------------"
+              Write-Host "YOUR RDP ADDRESS: $address"
+              Write-Host "----------------------------"
+          } catch {
+              Write-Host "Error: Could not get address. Please check Ngrok Dashboard Endpoints page."
+          }
 
       - name: Keep Alive
         run: Start-Sleep -Seconds 21600
