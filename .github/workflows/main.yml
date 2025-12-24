@@ -1,4 +1,4 @@
-name: FREE_RDP
+name: FREE_RDP_DIRECT
 on: workflow_dispatch
 
 jobs:
@@ -11,16 +11,17 @@ jobs:
           Import-Module "$env:ProgramData\chocolatey\helpers\chocolateyInstaller.psm1"
           Update-SessionEnvironment
 
-      - name: Configure Ngrok
-        run: ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+      - name: Configure Ngrok Direct
+        # Yahan apna token paste karein (Example: ngrok config add-authtoken 2Xyz...)
+        run: ngrok config add-authtoken APNA_NGROK_TOKEN_YAHAN_DALAIN
 
-      - name: Setup Windows RDP
+      - name: Enable RDP
         run: |
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
 
-      - name: Create RDP User
+      - name: Setup User
         run: |
           $user = "runneradmin"
           $password = ConvertTo-SecureString "P@ssw0rd!" -AsPlainText -Force
@@ -32,7 +33,7 @@ jobs:
           }
 
       - name: Start Tunnel
-        # Is line se hum Asia server use kar rahe hain takay block na ho
+        # Is line mein logs ko enable kiya hai takay galti samne aaye
         run: Start-Process ngrok -ArgumentList "tcp --region ap 3389"
 
       - name: Keep Alive
