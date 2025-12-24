@@ -1,4 +1,4 @@
-name: FREE_RDP_FIXED_V2
+name: FREE_RDP_FINAL_FIX
 on: workflow_dispatch
 
 jobs:
@@ -19,24 +19,12 @@ jobs:
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
-      - name: Start Tunnel and Display Address
+      - name: Start Tunnel
         shell: pwsh
-        run: |
-          # Tunnel ko start karke thora wait karenge
-          Start-Process ngrok -ArgumentList "tcp --region us 3389"
-          Write-Host "Waiting 45 seconds for Ngrok to connect..."
-          Start-Sleep -Seconds 45
-          
-          # Address ko fetch karne ki koshish
-          try {
-              $tunnels = Invoke-RestMethod http://localhost:4040/api/tunnels
-              $address = $tunnels.tunnels[0].public_url
-              Write-Host "----------------------------"
-              Write-Host "YOUR RDP ADDRESS: $address"
-              Write-Host "----------------------------"
-          } catch {
-              Write-Host "Error: Could not get address. Please check Ngrok Dashboard Endpoints page."
-          }
+        # Is baar region 'ap' (Asia) rakha hai
+        run: Start-Process ngrok -ArgumentList "tcp --region ap 3389"
 
       - name: Keep Alive
-        run: Start-Sleep -Seconds 21600
+        run: |
+          Write-Host "RDP is Ready! Please refresh Ngrok Endpoints Dashboard."
+          Start-Sleep -Seconds 21600
