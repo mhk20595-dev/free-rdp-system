@@ -1,4 +1,4 @@
-name: FREE_RDP_DEBUG
+name: FREE_RDP_NEW_TOKEN
 on: workflow_dispatch
 
 jobs:
@@ -12,15 +12,26 @@ jobs:
           Update-SessionEnvironment
 
       - name: Configure Ngrok
-        run: ngrok config add-authtoken 37IbSrbYRJHpIiJUqGNrTv5G2tf_5vvsanAGYkz3UsQB6gmmm
+        # Aapka naya token yahan update kar diya gaya hai
+        run: ngrok config add-authtoken 37Iwu0EvVs1xbdOqdIAsS6X9KCn_6dtWT1a9XNM15aCMdG3PB
 
-      - name: Start Tunnel (Forced)
+      - name: Enable Windows RDP
+        run: |
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+
+      - name: Start Tunnel and Display Address
         shell: pwsh
         run: |
-          # Is command se humein pata chalay ga ke tunnel kyu nahi ban rahi
-          Start-Process ngrok -ArgumentList "tcp --region us 3389 --log=stdout"
-          Write-Host "Waiting 30 seconds for tunnel to establish..."
-          Start-Sleep -Seconds 30
+          Start-Process ngrok -ArgumentList "tcp --region us 3389"
+          Write-Host "Waiting for tunnel address..."
+          Start-Sleep -Seconds 20
+          # Ye command address ko seedha GitHub screen par print karegi
+          $tunnels = Invoke-RestMethod http://localhost:4040/api/tunnels
+          $address = $tunnels.tunnels[0].public_url
+          Write-Host "----------------------------"
+          Write-Host "YOUR RDP ADDRESS: $address"
+          Write-Host "----------------------------"
 
       - name: Keep Alive
         run: Start-Sleep -Seconds 21600
