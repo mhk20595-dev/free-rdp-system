@@ -1,4 +1,4 @@
-name: FREE_RDP_USA_REGION
+name: FREE_RDP_DEBUG
 on: workflow_dispatch
 
 jobs:
@@ -11,31 +11,16 @@ jobs:
           Import-Module "$env:ProgramData\chocolatey\helpers\chocolateyInstaller.psm1"
           Update-SessionEnvironment
 
-      - name: Configure Ngrok Direct
+      - name: Configure Ngrok
         run: ngrok config add-authtoken 37IbSrbYRJHpIiJUqGNrTv5G2tf_5vvsanAGYkz3UsQB6gmmm
 
-      - name: Enable Windows RDP
+      - name: Start Tunnel (Forced)
+        shell: pwsh
         run: |
-          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
-          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
-
-      - name: Create RDP User
-        run: |
-          $user = "runneradmin"
-          $password = ConvertTo-SecureString "P@ssw0rd!" -AsPlainText -Force
-          if (Get-LocalUser -Name $user -ErrorAction SilentlyContinue) {
-              Set-LocalUser -Name $user -Password $password
-          } else {
-              New-LocalUser -Name $user -Password $password -FullName "Runner Admin"
-              Add-LocalGroupMember -Group "Administrators" -Member $user
-          }
-
-      - name: Start Tunnel
-        # Region ko 'ap' se badal kar 'us' kar diya hai
-        run: Start-Process ngrok -ArgumentList "tcp --region us 3389"
+          # Is command se humein pata chalay ga ke tunnel kyu nahi ban rahi
+          Start-Process ngrok -ArgumentList "tcp --region us 3389 --log=stdout"
+          Write-Host "Waiting 30 seconds for tunnel to establish..."
+          Start-Sleep -Seconds 30
 
       - name: Keep Alive
-        run: |
-          Write-Host "RDP is Ready! Check Ngrok Endpoints Dashboard."
-          Start-Sleep -Seconds 21600
+        run: Start-Sleep -Seconds 21600
